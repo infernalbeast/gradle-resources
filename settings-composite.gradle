@@ -1,0 +1,159 @@
+class Parameters {
+	String[] allow
+	def setAllow(String... allow) {
+		this.allow = allow
+	}
+	def getAllow() {
+		return allow
+	}
+}
+
+def hasProject(def file, def name) {
+	def checkFile=new File(file, name)
+	if (checkFile.exists()) {
+		return true;
+	} else {
+		for (File childFile: file.listFiles()) {
+			if (childFile.isDirectory()) {
+				def buildFile=new File(childFile,"build.gradle")
+				if (buildFile.exists()) {
+					if (hasProject(childFile, name)) {
+						return true;
+					}
+				}
+			}
+		}
+	}
+	return false;
+}
+
+if (hasProperty('composite') || System.env.COMPOSITE != null) {
+	def hasDelegate
+	try {
+		this.delegate = new Parameters()
+		this.call()
+		hasDelegate=true
+	} catch (Throwable t) {
+		hasDelegate=false
+	}
+
+
+	println "PROJECT: " + group + ":" + rootProject.name
+	if (gradle.parent == null) {
+		logger.lifecycle "ROOT: " + group + ":" + rootProject.name
+		rootProject.projectDir.parentFile.eachDir() { dir ->
+			def settingsGradle = new File(dir,"settings.gradle")
+			if (settingsGradle.exists()) {
+				if (!dir.name.equals(rootProject.name)
+				) {
+					println "INCLUDE BUILD "+dir
+					includeBuild(dir)
+				} else {
+					println "EXCLUDE BUILD "+dir
+				}
+			}
+		}
+	}
+	if (false && gradle.parent == null) {
+		if (!hasDelegate) {
+			def excludeProjects = [
+				'com.infernalbeast:bom',
+				'com.infernalbeast:gradle-scripts'
+			]
+			if (hasProperty("com.infernalbeast:bom")) {
+				def dependencyManagementProperties = new Properties()
+				new File(rootProject.projectDir.parent,"bom/src/main/resources/dependency-management.properties").withInputStream {
+					dependencyManagementProperties.load(it)
+				}
+				includeBuild("../bom") {
+					dependencySubstitution {
+						dependencyManagementProperties.each { name, value ->
+							int index=name.indexOf(':')
+							if (index != -1 && !excludeProjects.contains(name)) {
+								if (hasProject(rootProject.projectDir.parentFile, name.substring(index+1))) {
+									logger.lifecycle "Excluding Module: "+name
+								} else {
+									logger.lifecycle "BOM: "+name+" -> "+name+":"+value
+									substitute module(name) with module(name+":"+value)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		def pomGroupIdPattern = java.util.regex.Pattern.compile("pom.groupId\\s*=\\s*('([^']*)'|\"([^']*)\")")
+		rootProject.projectDir.parentFile.eachDir() { dir ->
+			def g = new File(dir,"settings.gradle")
+			def name = dir.getName()
+			if (name != rootProject.name) {
+				if (!hasDelegate || !this.delegate.hasProperty('allow') || (this.delegate.allow != null && this.delegate.allow.contains(name))) {
+					if (g.isFile()) {
+						def excludeProjects = [
+							'bom',
+							'gradle-scripts'
+						]
+						if (!excludeProjects.contains(name)) {
+							includeBuild('../'+name) {
+								dependencySubstitution {
+									logger.lifecycle "LOADING: "+name
+									def gradlePropertiesFile = new File(rootProject.projectDir.parent, name + "/gradle.properties")
+									def group = null
+									if (gradlePropertiesFile.exists()) {
+										def gradleProperties = new Properties();
+										gradlePropertiesFile.withInputStream {
+											gradleProperties.load(it)
+										}
+										group = gradleProperties["group"]
+									}
+									if (group == null) {
+										def buildGradle = new File(rootProject.projectDir.parent, name + "/build.gradle")
+										if (buildGradle.exists()) {
+											def buildGradleReader = new BufferedReader(new FileReader(buildGradle))
+											def line
+											while((line = buildGradleReader.readLine()) != null) {
+												def matcher = pomGroupIdPattern.matcher(line)
+												if (matcher.find()) {
+													group = matcher.group(2)
+													if (group == null) {
+														group = matcher.group(3)
+													}
+												}
+											}
+										}
+									}
+									if (group != null) {
+										dir.eachDir() { subdir ->
+											def subb = new File(subdir, "build.gradle")
+											def srcsub = new File(subdir,"src")
+											def projectsub = new File(subdir,".project")
+											if ((srcsub.isDirectory() || projectsub.isFile()) && !subdir.getName().equals("bin")) {
+												logger.lifecycle "substitute module('"+group+":"+subdir.getName()+"') with project(':"+subdir.getName()+"')"
+												substitute module(group+":"+subdir.getName()) with project(":"+subdir.getName())
+											}
+										}
+										logger.lifecycle "root substitute module('"+group+':'+name+"') with project(':')"
+										substitute module(group+':'+name) with project(':')
+									} else {
+										logger.lifecycle "Group Name Not Found: "+name
+									}
+									dir.eachDir() { subdir ->
+										def srcsub = new File(subdir,"src")
+										def projectsub = new File(subdir,".project")
+										if ((srcsub.isDirectory() || projectsub.isFile()) && !subdir.getName().equals("bin")) {
+											logger.lifecycle "substitute project(':"+subdir.getName()+"') with project(':"+subdir.getName()+"')"
+											// Not sure why this necessarily needs to be included
+											substitute project(":"+subdir.getName()) with project(":"+subdir.getName())
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+} else {
+	logger.lifecycle "Ignoring Composite Settings"
+}

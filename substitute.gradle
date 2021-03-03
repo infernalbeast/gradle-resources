@@ -1,0 +1,33 @@
+if (System.env.BOM) {
+	def bomDependencyManagementProperties = new Properties()
+	new URL(System.env.BOM + "bom-dependency-management.properties").withInputStream { bomDependencyManagementProperties.load(it) }
+	def dependencyManagementProperties = new Properties()
+	new URL(System.env.BOM + "dependency-management.properties").withInputStream { dependencyManagementProperties.load(it) }
+	// Configuration has its own dependencies
+	def deps = dependencies
+	configurations.all { configuration ->
+		resolutionStrategy.dependencySubstitution.all { dependency ->
+			try {
+				def requested = dependency.requested
+				if (requested.hasProperty("version") && !requested.version) {
+					if (dependency.requested.group.equals("com.infernalbeast") || dependency.requested.group.startsWith("com.infernalbeast.")) {
+						logger.lifecycle "DEPENDENCY REQUESTED "+dependency.requested+" for "+project.name
+					} else {
+						def name = dependency.requested.group+":"+dependency.requested.module
+						def value = dependencyManagementProperties[name]
+						if (value != null) {
+							logger.lifecycle "USE TARGET: "+dependency.requested+" -> "+name+":"+value
+							dependency.useTarget name+":"+value
+						}
+					}
+				}
+			} catch (Throwable t) {
+				t.printStackTrace()
+				System.exit(0)
+			}
+		}
+		bomDependencyManagementProperties.each{ key, value ->
+			deps.add(configuration.name, deps.platform(key+":"+value))
+		}
+	}
+}

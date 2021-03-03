@@ -1,0 +1,31 @@
+apply from: System.env.GRADLE_RESOURCES + "substitute.gradle"
+
+//dependencies {
+//	classpath platform("org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR1")
+//}
+
+configurations.classpath.attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 12)
+// Only load these plugins if they are in the environment
+buildscript {
+	def pluginResolve = configurations.create("plugin_resolve")
+	dependencies {
+		if (gradle.parent == null) {
+			if (!(group+":"+name).equals("com.infernalbeast:resources-comment")) {
+				plugin_resolve 'com.infernalbeast:resources-comment'
+			}
+			if (!(group+":"+name).equals("com.infernalbeast:resources-regex")) {
+				plugin_resolve 'com.infernalbeast:resources-regex'
+			}
+			if (!(group+":"+name).equals("com.infernalbeast:classes-dynamic")) {
+				plugin_resolve 'com.infernalbeast:classes-dynamic'
+			}
+		}
+	}
+	project.ext["plugin-resolve"] = pluginResolve.resolvedConfiguration.lenientConfiguration
+}
+dependencies {
+	project.ext["plugin-resolve"].artifacts.each { artifact ->
+		def id = artifact.moduleVersion.id
+		classpath group: id.group, name: id.name, version: id.version, classifier: artifact.classifier
+	}
+}

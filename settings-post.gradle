@@ -1,0 +1,1 @@
+apply from: System.env.GRADLE_RESOURCES + "settings-composite.gradle"

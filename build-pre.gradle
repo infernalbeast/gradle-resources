@@ -1,0 +1,74 @@
+apply plugin: 'java-library'
+//sourceCompatibility = 12
+//targetCompatibility = 12
+sourceCompatibility=JavaVersion.VERSION_11
+targetCompatibility=JavaVersion.VERSION_11
+
+apply plugin: 'eclipse'
+if (gradle.parent == null) {
+	if (project.rootProject.ext.has("plugin-resolve")) {
+		project.rootProject.ext["plugin-resolve"].artifacts.each { artifact ->
+			def id = artifact.moduleVersion.id
+			apply plugin: id.group + "." + id.name
+		}
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+//	implementation platform('org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR1')
+//	implementation platform('org.springframework.boot:spring-boot-dependencies:2.1.4.RELEASE')
+//	implementation platform('org.springframework:spring-framework-bom:5.1.6.RELEASE')
+//	implementation platform('com.amazonaws:aws-java-sdk-bom:[1.11.582,2.0)')
+
+	if (project.rootProject.ext.has("plugin-resolve")) {
+		project.rootProject.ext["plugin-resolve"].artifacts.each { artifact ->
+			def id = artifact.moduleVersion.id
+			if (id.group == "com.infernalbeast" && id.name == "resources-comment") {
+				testImplementation group: id.group, name: id.name, classifier: artifact.classifier
+			}
+		}
+	}
+}
+
+// https://www.petrikainulainen.net/programming/gradle/getting-started-with-gradle-integration-testing/
+configurations {
+	integrationTestCompile.extendsFrom testCompile
+	integrationTestRuntime.extendsFrom testRuntime
+}
+
+sourceSets {
+	integrationTest {
+		java {
+			compileClasspath += sourceSets.main.output + sourceSets.test.output
+			runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources {
+			srcDir file('src/integration-test/resources')
+		}
+	}
+}
+
+task integrationTest(type: Test) {
+	group 'Verification'
+	description 'Runs the integration tests.'
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
+tasks.withType(Test)*.configure { test ->
+	testLogging.showStandardStreams = true
+	//If we just run `gradle test` it will not run this again
+	outputs.upToDateWhen {
+		// `gradle test -PrerunTest`
+		if (project.hasProperty('rerunTest')) {
+			return false
+		} else {
+			return true
+		}
+	}
+}
