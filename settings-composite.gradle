@@ -38,7 +38,7 @@ if (hasProperty('composite') || System.env.COMPOSITE != null) {
 	}
 
 
-	println "PROJECT: " + group + ":" + rootProject.name
+	logger.lifecycle "PROJECT: " + group + ":" + rootProject.name
 	if (gradle.parent == null) {
 		logger.lifecycle "ROOT: " + group + ":" + rootProject.name
 		rootProject.projectDir.parentFile.eachDir() { dir ->
@@ -46,10 +46,10 @@ if (hasProperty('composite') || System.env.COMPOSITE != null) {
 			if (settingsGradle.exists()) {
 				if (!dir.name.equals(rootProject.name)
 				) {
-					println "INCLUDE BUILD "+dir
+					logger.lifecycle "INCLUDE BUILD "+dir
 					includeBuild(dir)
 				} else {
-					println "EXCLUDE BUILD "+dir
+					logger.lifecycle "EXCLUDE BUILD "+dir
 				}
 			}
 		}

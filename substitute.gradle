@@ -1,11 +1,7 @@
-if (System.env.BOM) {
-	def bomDependencyManagementProperties = new Properties()
-	new URL(System.env.BOM + "bom-dependency-management.properties").withInputStream { bomDependencyManagementProperties.load(it) }
-	def dependencyManagementProperties = new Properties()
-	new URL(System.env.BOM + "dependency-management.properties").withInputStream { dependencyManagementProperties.load(it) }
-	// Configuration has its own dependencies
-	def deps = dependencies
-	configurations.all { configuration ->
+// Configuration has its own dependencies
+def deps = dependencies
+configurations.all { configuration ->
+	if (project.ext.has("dependencyManagementProperties")) {
 		resolutionStrategy.dependencySubstitution.all { dependency ->
 			try {
 				def requested = dependency.requested
@@ -14,7 +10,7 @@ if (System.env.BOM) {
 						logger.lifecycle "DEPENDENCY REQUESTED "+dependency.requested+" for "+project.name
 					} else {
 						def name = dependency.requested.group+":"+dependency.requested.module
-						def value = dependencyManagementProperties[name]
+						def value = project.ext["dependencyManagementProperties"][name]
 						if (value != null) {
 							logger.lifecycle "USE TARGET: "+dependency.requested+" -> "+name+":"+value
 							dependency.useTarget name+":"+value
@@ -26,7 +22,9 @@ if (System.env.BOM) {
 				System.exit(0)
 			}
 		}
-		bomDependencyManagementProperties.each{ key, value ->
+	}
+	if (project.ext.has("bomDependencyManagementProperties")) {
+		project.ext["bomDependencyManagementProperties"].each{ key, value ->
 			deps.add(configuration.name, deps.platform(key+":"+value))
 		}
 	}
