@@ -31,17 +31,21 @@ if (project.hasProperty("artifactoryClasspath")) {
 			artifactDirectory = ".classloader"
 			// Optional: The credentials use use when accessing the artifactories
 			credentials = [
-				BintrayJCenter: [
-					environmentUsername: "JCENTER_USERNAME",
-					environmentPassword: "JCENTER_PASSWORD"
-				],
-				JFrog: [
-					systemUsername: "jfrogUser",
-					systemPassword: "jfrogPassword"
-				],
-				MavenCentral: [
-					username: "literalusername",
-					password: "literalpassword"
+				// Should match the name of the gradle repository being used
+				MavenRepo: [
+					// Get the credentials from various sources
+					// If username and password are defined and environment, system,
+					// and literal are not defined, it will ask the user at run time.
+					username: [
+						environment: "MAVEN_USERNAME",
+						system: "mavenUsername",
+						// literal: "myusername"
+					],
+					password: [
+						environment: "MAVEN_PASSWORD",
+						system: "mavenPassword",
+						// literal: "mypassword"
+					]
 				]
 			]
 		}
