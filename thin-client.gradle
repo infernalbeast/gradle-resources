@@ -1,0 +1,24 @@
+class Parameters {
+	def jarTask
+
+	def setJarTask(def jarTask) {
+		this.jarTask = jarTask
+	}
+
+	def getJarTask() {
+		return jarTask
+	}
+}
+
+def delegate = new Parameters()
+this.delegate = delegate
+this.call()
+
+if (project.hasProperty("artifactoryClasspath")) {
+	artifactoryClasspath {
+		tasks.create(name: delegate.jarTask.name + "ThinClient", type: artifactTaskClass) {
+			// Required: The task which generates the executable jar
+			jar = delegate.jarTask
+		}
+	}
+}

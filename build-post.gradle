@@ -16,40 +16,38 @@ if (project.hasProperty("resourcesComment")) {
 
 if (project.hasProperty("artifactoryClasspath")) {
 	artifactoryClasspath {
-		// The output resource directory for META-INF
-		// outputDirectory = new File(new File(buildDir, "artifactory-classpath"), sourceSet.name)
-		task thinClient(type: artifactoryClasspathTaskClass) {
+		tasks.create(name: "mainRuntimeClasspathLedger", type: ledgerTaskClass) {
 			// Required: The source set to be modified
 			sourceSet = sourceSets.findByName("main")
-			// Required: The task which generates the executable jar
-			jar = tasks.findByName("jar")
 			// Required: The configuration which to extract the dependencies
 			configuration = configurations.findByName("runtimeClasspath")
 			// Optional: The default number of retries when downloading before failing
 			retry = 5
 			// Optional: The default user artifact directory
-			artifactDirectory = ".classloader"
+			// artifactDirectory = ".classloader"
 			// Optional: The credentials use use when accessing the artifactories
-			credentials = [
-				// Should match the name of the gradle repository being used
-				MavenRepo: [
-					// Get the credentials from various sources
-					// If username and password are defined and environment, system,
-					// and literal are not defined, it will ask the user at run time.
-					username: [
-						environment: "MAVEN_USERNAME",
-						system: "mavenUsername",
-						// literal: "myusername"
-					],
-					password: [
-						environment: "MAVEN_PASSWORD",
-						system: "mavenPassword",
-						// literal: "mypassword"
-					]
-				]
-			]
+//			credentials = [
+//				// Should match the name of the gradle repository being used
+//				MavenRepo: [
+//					// Get the credentials from various sources
+//					// If environment and system are not defined,
+//					// it will ask the user at runtime.
+//					username: [
+//						environment: "MAVEN_USERNAME",
+//						system: "mavenUsername"
+//					],
+//					password: [
+//						environment: "MAVEN_PASSWORD",
+//						system: "mavenPassword"
+//					]
+//				]
+//			]
 		}
 	}
+}
+
+apply from: rootProject.ext["gradle-resources"] + "thin-client.gradle", to: {
+	setJarTask jar
 }
 
 if (project.hasProperty("resourcesRegex")) {
