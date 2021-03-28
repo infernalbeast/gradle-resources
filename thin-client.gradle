@@ -8,17 +8,27 @@ class Parameters {
 	def getJarTask() {
 		return jarTask
 	}
+
+	def lazy
+
+	def setLazy(def lazy) {
+		this.lazy = lazy
+	}
+
+	def isLazy() {
+		return lazy
+	}
 }
 
 def delegate = new Parameters()
 this.delegate = delegate
 this.call()
 
-if (project.hasProperty("artifactoryClasspath")) {
-	artifactoryClasspath {
-		tasks.create(name: delegate.jarTask.name + "ThinClient", type: artifactTaskClass) {
-			// Required: The task which generates the executable jar
-			jar = delegate.jarTask
-		}
+artifactoryClassloader {
+	tasks.create(name: delegate.jarTask.name + "ThinClient", type: artifactTaskClass) {
+		// Required: The task which generates the executable jar
+		jar = delegate.jarTask
+		// Required: The loading tactic
+		lazy = delegate.lazy
 	}
 }

@@ -14,40 +14,16 @@ if (project.hasProperty("resourcesComment")) {
 	}
 }
 
-if (project.hasProperty("artifactoryClasspath")) {
-	artifactoryClasspath {
-		tasks.create(name: "mainRuntimeClasspathLedger", type: ledgerTaskClass) {
-			// Required: The source set to be modified
-			sourceSet = sourceSets.findByName("main")
-			// Required: The configuration which to extract the dependencies
-			configuration = configurations.findByName("runtimeClasspath")
-			// Optional: The default number of retries when downloading before failing
-			retry = 5
-			// Optional: The default user artifact directory
-			// artifactDirectory = ".classloader"
-			// Optional: The credentials use use when accessing the artifactories
-//			credentials = [
-//				// Should match the name of the gradle repository being used
-//				MavenRepo: [
-//					// Get the credentials from various sources
-//					// If environment and system are not defined,
-//					// it will ask the user at runtime.
-//					username: [
-//						environment: "MAVEN_USERNAME",
-//						system: "mavenUsername"
-//					],
-//					password: [
-//						environment: "MAVEN_PASSWORD",
-//						system: "mavenPassword"
-//					]
-//				]
-//			]
-		}
+if (project.hasProperty("artifactoryClassloader")) {
+	apply from: rootProject.ext["gradle-resources"] + "thin-client-ledger.gradle", to: {
+		setSourceSet sourceSets.main
+		setConfiguration configurations.runtimeClasspath
+		setRetry 5
 	}
-}
-
-apply from: rootProject.ext["gradle-resources"] + "thin-client.gradle", to: {
-	setJarTask jar
+	apply from: rootProject.ext["gradle-resources"] + "thin-client.gradle", to: {
+		setJarTask jar
+		setLazy true
+	}
 }
 
 if (project.hasProperty("resourcesRegex")) {

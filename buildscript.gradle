@@ -1,5 +1,9 @@
 apply from: rootProject.ext["gradle-resources"] + "substitute.gradle"
 
+//repositories {
+//	mavenCentral()
+//}
+
 //dependencies {
 //	classpath platform("org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR1")
 //}

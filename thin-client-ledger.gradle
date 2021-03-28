@@ -1,0 +1,62 @@
+class Parameters {
+	def sourceSet
+
+	def setSourceSet(def sourceSet) {
+		this.sourceSet = sourceSet
+	}
+	def getSourceSet() {
+		return sourceSet
+	}
+
+	def configuration
+
+	def setConfiguration(def configuration) {
+		this.configuration = configuration
+	}
+	def getConfiguration() {
+		return configuration
+	}
+
+	def retry
+
+	def setRetry(def retry) {
+		this.retry = retry
+	}
+	def getRetry() {
+		return retry
+	}
+}
+
+def delegate = new Parameters()
+this.delegate = delegate
+this.call()
+
+artifactoryClassloader {
+	tasks.create(name: delegate.sourceSet.name + "-" + delegate.configuration.name + "-" + "Ledger", type: ledgerTaskClass) {
+		// Required: The source set to be modified
+		sourceSet = delegate.sourceSet
+		// Required: The configuration which to extract the dependencies
+		configuration = delegate.configuration
+		// Optional: The default number of retries when downloading before failing
+		retry = delegate.retry
+		// Optional: The default user artifact directory
+		// artifactDirectory = ".classloader"
+		// Optional: The credentials use use when accessing the artifactories
+		//			credentials = [
+		//				// Should match the name of the gradle repository being used
+		//				MavenRepo: [
+		//					// Get the credentials from various sources
+		//					// If environment and system are not defined,
+		//					// it will ask the user at runtime.
+		//					username: [
+		//						environment: "MAVEN_USERNAME",
+		//						system: "mavenUsername"
+		//					],
+		//					password: [
+		//						environment: "MAVEN_PASSWORD",
+		//						system: "mavenPassword"
+		//					]
+		//				]
+		//			]
+	}
+}

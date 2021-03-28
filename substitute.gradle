@@ -1,7 +1,7 @@
 // Configuration has its own dependencies
 def deps = dependencies
 configurations.all { configuration ->
-	if (project.ext.has("dependencyManagementProperties")) {
+	if (rootProject.ext.has("dependencyManagementProperties")) {
 		resolutionStrategy.dependencySubstitution.all { dependency ->
 			try {
 				def requested = dependency.requested
@@ -10,7 +10,7 @@ configurations.all { configuration ->
 						logger.lifecycle "DEPENDENCY REQUESTED "+dependency.requested+" for "+project.name
 					} else {
 						def name = dependency.requested.group+":"+dependency.requested.module
-						def value = project.ext["dependencyManagementProperties"][name]
+						def value = rootProject.ext["dependencyManagementProperties"][name]
 						if (value != null) {
 							logger.lifecycle "USE TARGET: "+dependency.requested+" -> "+name+":"+value
 							dependency.useTarget name+":"+value
