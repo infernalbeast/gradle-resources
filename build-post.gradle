@@ -52,27 +52,13 @@ if (project.hasProperty("classesDynamic")) {
 
 if (System.env.ECLIPSE) {
 	dependencies {
-		sourceSets.main.java.srcDirs.each { dir ->
-			if (dir.exists()) {
-				logger.lifecycle "ADDING: " + dir
-				def link = new File(dir.getParentFile(),dir.getName()+"-link")
-				if (!link.exists()) {
-					ant.symlink(resource: dir, link: link)
-				}
-				if (configurations.implementation.state == Configuration.State.UNRESOLVED) {
-					implementation files(link)
-				}
-			}
+		apply from: rootProject.ext["gradle-resources"] + "source-as-resources.gradle", to: {
+			setSourceSet sourceSets.main
+			setConfiguration configurations.implementation
 		}
-		sourceSets.test.java.srcDirs.each { dir ->
-			if (dir.exists()) {
-				logger.lifecycle "ADDING: " + dir
-				def link = new File(dir.getParentFile(),dir.getName()+"-link")
-				if (!link.exists()) {
-					ant.symlink(resource: dir, link: link)
-				}
-				testImplementation files(link)
-			}
+		apply from: rootProject.ext["gradle-resources"] + "source-as-resources.gradle", to: {
+			setSourceSet sourceSets.test
+			setConfiguration configurations.testImplementation
 		}
 	}
 }

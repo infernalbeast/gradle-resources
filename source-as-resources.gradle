@@ -1,0 +1,42 @@
+class Parameters {
+	def sourceSet
+
+	def setSourceSet(def sourceSet) {
+		this.sourceSet = sourceSet
+	}
+
+	def getSourceSet() {
+		return sourceSet
+	}
+
+	def configuration
+
+	def setConfiguration(def configuration) {
+		this.configuration = configuration
+	}
+
+	def getConfiguration() {
+		return configuration
+	}
+}
+
+def delegate = new Parameters()
+this.delegate = delegate
+this.call()
+
+project.dependencies {
+	delegate.sourceSet.java.srcDirs.each { dir ->
+		if (dir.exists()) {
+			//logger.lifecycle "ADDING: " + dir + " to " + delegate.configuration.name
+			def link = new File(dir.getParentFile(), dir.getName() + "-link")
+			if (link.exists()) {
+				project.delete link
+			}
+			ant.symlink(resource: dir, link: link, overwrite: true)
+			if (delegate.configuration.state == Configuration.State.UNRESOLVED) {
+				logger.lifecycle "ADDING: " + project.name + ":" + delegate.configuration.name + ": " + dir
+				"$delegate.configuration.name" files(link)
+			}
+		}
+	}
+}
