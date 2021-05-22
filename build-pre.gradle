@@ -9,7 +9,7 @@ if (gradle.parent == null) {
 	if (project.rootProject.ext.has("plugin-resolve")) {
 		project.rootProject.ext["plugin-resolve"].artifacts.each { artifact ->
 			def id = artifact.moduleVersion.id
-			apply plugin: id.group + "." + id.name
+			apply plugin: id.group + "." + id.name.substring(0, id.name.length() - "-gradle-plugin".length())
 		}
 	}
 }
@@ -27,7 +27,7 @@ dependencies {
 	if (project.rootProject.ext.has("plugin-resolve")) {
 		project.rootProject.ext["plugin-resolve"].artifacts.each { artifact ->
 			def id = artifact.moduleVersion.id
-			if (id.group == "com.infernalbeast" && id.name == "resources-comment") {
+			if (id.group == "com.infernalbeast" && id.name == "resources-comment-gradle-plugin") {
 				testImplementation group: id.group, name: id.name, classifier: artifact.classifier
 			}
 		}

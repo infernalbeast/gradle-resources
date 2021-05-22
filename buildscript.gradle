@@ -14,14 +14,14 @@ buildscript {
 	def pluginResolve = configurations.create("plugin_resolve")
 	dependencies {
 		if (gradle.parent == null) {
-			if (!(group+":"+name).equals("com.infernalbeast:resources-comment")) {
-				plugin_resolve 'com.infernalbeast:resources-comment'
+			if (!(group+":"+name).equals("com.infernalbeast:resources-comment-gradle-plugin")) {
+				plugin_resolve 'com.infernalbeast:resources-comment-gradle-plugin'
 			}
-			if (!(group+":"+name).equals("com.infernalbeast:resources-regex")) {
-				plugin_resolve 'com.infernalbeast:resources-regex'
+			if (!(group+":"+name).equals("com.infernalbeast:resources-regex-gradle-plugin")) {
+				plugin_resolve 'com.infernalbeast:resources-regex-gradle-plugin'
 			}
-			if (!(group+":"+name).equals("com.infernalbeast:classes-dynamic")) {
-				plugin_resolve 'com.infernalbeast:classes-dynamic'
+			if (!(group+":"+name).equals("com.infernalbeast:classes-dynamic-gradle-plugin")) {
+				plugin_resolve 'com.infernalbeast:classes-dynamic-gradle-plugin'
 			}
 		}
 	}

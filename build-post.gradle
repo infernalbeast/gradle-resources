@@ -63,7 +63,30 @@ if (System.env.ECLIPSE) {
 	}
 }
 
+task synchronization {
+	doFirst {
+		logger.lifecycle "SYNCHRONIZATION: "+project.name
+	}
+	dependsOn(eclipseJdt)
+	if (project.parent != null) {
+		project.parent.tasks."synchronization".dependsOn(synchronization)
+	}
+}
+
+task compositeSynchronization {
+	gradle.includedBuilds.each { includedBuild ->
+		dependsOn includedBuild.task(":synchronization")
+	}
+	dependsOn synchronization
+}
+
 eclipse {
+	jdt.file.withProperties { props ->
+		props.setProperty "org.eclipse.jdt.core.circularClasspath", "warning"
+	}
+
+	// WORKAROUND: https://github.com/eclipse/buildship/issues/1038  
+	synchronizationTasks compositeSynchronization
 	// This will add the source as a dependency if eclipse is making the request
 	// Otherwise expect a gradle plugin to make the necessary resources available
 	classpath {
