@@ -28,7 +28,7 @@ project.dependencies {
 	delegate.sourceSet.java.srcDirs.each { dir ->
 		if (dir.exists()) {
 			//logger.lifecycle "ADDING: " + dir + " to " + delegate.configuration.name
-			def link = new File(dir.getParentFile(), dir.getName() + "-link")
+			def link = new File(dir.getParentFile(), dir.getName() + "-source")
 			if (link.exists()) {
 				project.delete link
 			}
