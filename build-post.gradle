@@ -80,33 +80,6 @@ task compositeSynchronization {
 	dependsOn synchronization
 }
 
-eclipse {
-	jdt.file.withProperties { props ->
-		props.setProperty "org.eclipse.jdt.core.circularClasspath", "warning"
-	}
-
-	// WORKAROUND: https://github.com/eclipse/buildship/issues/1038  
-	synchronizationTasks compositeSynchronization
-	// This will add the source as a dependency if eclipse is making the request
-	// Otherwise expect a gradle plugin to make the necessary resources available
-	classpath {
-		downloadJavadoc = true
-		downloadSources = true
-	}
-	// https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
-
-	def props = new Properties()
-	file(".settings").mkdirs()
-	def prefs = file(".settings/org.eclipse.jdt.core.prefs")
-	if (prefs.exists()) {
-		prefs.withInputStream { stream ->
-			props.load(stream)
-		}
-	}
-	props.setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
-	prefs.withOutputStream { stream ->
-		props.store(stream, null)
-	}
-}
+apply from: rootProject.ext["gradle-resources"] + "eclipse.gradle"
 
 apply from: rootProject.ext["gradle-resources"] + "substitute.gradle"

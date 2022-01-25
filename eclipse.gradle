@@ -1,0 +1,53 @@
+eclipse {
+	jdt.file.withProperties { props ->
+		props.setProperty "org.eclipse.jdt.core.circularClasspath", "warning"
+	}
+
+	// WORKAROUND: https://github.com/eclipse/buildship/issues/1038  
+	synchronizationTasks compositeSynchronization
+	// This will add the source as a dependency if eclipse is making the request
+	// Otherwise expect a gradle plugin to make the necessary resources available
+	classpath {
+		downloadJavadoc = true
+		downloadSources = true
+		
+		//Sort the dependencies
+		file {
+			whenMerged { classpath ->
+				classpath.entries.sort{entry1, entry2 ->
+					if (entry1.getClass()==entry2.getClass()) {
+						if (entry1 instanceof org.gradle.plugins.ide.eclipse.model.Library) {
+							def name1 = entry1.library.file.name
+							def name2 = entry2.library.file.name
+							def index1 = name1.lastIndexOf("-")
+							def index2 = name2.lastIndexOf("-")
+							if (index1 != -1 && index2 != -1) {
+								String subName1 = name1.substring(0, index1)
+								String subName2 = name2.substring(0, index2)
+								def compare = subName1.toLowerCase().compareTo(subName2.toLowerCase())
+								return compare
+							} else {
+								return name1.toLowerCase().compareTo(name2.toLowerCase())
+							}
+						}
+					}
+					return 0
+				}
+			}
+		}
+	}
+	// https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
+
+	def props = new Properties()
+	file(".settings").mkdirs()
+	def prefs = file(".settings/org.eclipse.jdt.core.prefs")
+	if (prefs.exists()) {
+		prefs.withInputStream { stream ->
+			props.load(stream)
+		}
+	}
+	props.setProperty("org.eclipse.jdt.core.compiler.codegen.methodParameters", "generate")
+	prefs.withOutputStream { stream ->
+		props.store(stream, null)
+	}
+}
