@@ -8,7 +8,7 @@ apply from: rootProject.ext["gradle-resources"] + "substitute.gradle"
 //	classpath platform("org.springframework.cloud:spring-cloud-dependencies:Greenwich.SR1")
 //}
 
-configurations.classpath.attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 12)
+configurations.classpath.attributes.attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 17)
 // Only load these plugins if they are in the environment
 buildscript {
 	def pluginResolve = configurations.create("plugin_resolve")

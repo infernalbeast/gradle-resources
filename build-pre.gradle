@@ -1,8 +1,8 @@
 apply plugin: 'java-library'
 //sourceCompatibility = 12
 //targetCompatibility = 12
-sourceCompatibility=JavaVersion.VERSION_11
-targetCompatibility=JavaVersion.VERSION_11
+sourceCompatibility=JavaVersion.VERSION_17
+targetCompatibility=JavaVersion.VERSION_17
 
 apply plugin: 'eclipse'
 if (gradle.parent == null) {
@@ -16,6 +16,9 @@ if (gradle.parent == null) {
 
 repositories {
 	mavenCentral()
+//   	maven { url "https://repo.maven.apache.org/maven2" }
+//   	maven { url "https://repo1.maven.org/maven2" }
+//   	maven { url "https://repo2.maven.org/maven2" }
 }
 
 dependencies {
