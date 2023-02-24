@@ -23,9 +23,11 @@ configurations.all { configuration ->
 			}
 		}
 	}
-	if (project.ext.has("bomDependencyManagementProperties")) {
-		project.ext["bomDependencyManagementProperties"].each{ key, value ->
-			deps.add(configuration.name, deps.platform(key+":"+value))
+	if (configuration.isCanBeDeclaredAgainst()) {
+		if (project.ext.has("bomDependencyManagementProperties")) {
+			project.ext["bomDependencyManagementProperties"].each{ key, value ->
+				deps.add(configuration.name, deps.platform(key+":"+value))
+			}
 		}
 	}
 }

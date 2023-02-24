@@ -36,8 +36,8 @@ eclipse {
 			}
 		}
 	}
+	
 	// https://discuss.gradle.org/t/how-to-write-properties-to-3rd-party-eclipse-settings-files/6499/2
-
 	def props = new Properties()
 	file(".settings").mkdirs()
 	def prefs = file(".settings/org.eclipse.jdt.core.prefs")

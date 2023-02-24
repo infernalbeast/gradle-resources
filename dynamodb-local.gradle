@@ -1,0 +1,43 @@
+repositories {
+	maven {
+		name "DynamoDB Local Release Repository - EU (Frankfurt) Region"
+		url "https://s3.eu-central-1.amazonaws.com/dynamodb-local-frankfurt/release"
+	}
+}
+
+configurations.create("resolve_sqlite")
+dependencies {
+	resolve_sqlite group: 'com.amazonaws', name: 'DynamoDBLocal'
+	//	resolve_sqlite group: "com.almworks.sqlite4java", name: "libsqlite4java-linux-amd64"
+}
+
+task copyNativeDeps(type: Copy) {
+    from(configurations.resolve_sqlite) {
+        include '*.dll'
+        include '*.dylib'
+        include '*.so'
+    }
+    into 'build/libs'
+}
+
+test {
+	dependsOn copyNativeDeps
+	systemProperty "java.library.path", 'build/libs'
+//	doFirst {
+//		def pathSeparator = System.getProperty("path.separator")
+//		def javaLibraryPath
+//		configurations.resolve_sqlite.files.each {
+//			if (it =~ /.*\.dll/ || it =~ /.*\.dylib/ || it =~ /.*\.so/) {
+//				if (javaLibraryPath != null) {
+//					javaLibraryPath += pathSeparator
+//				} else {
+//					javaLibraryPath = ""
+//				}
+//				javaLibraryPath += it.toString()
+//			}
+//		}
+//		//systemProperty "java.library.path", javaLibraryPath
+//		systemProperty "sqlite4java.library.path", "/home/bakslashr.manjaro/.gradle/caches/modules-2/files-2.1/com.almworks.sqlite4java/libsqlite4java-linux-amd64/1.0.392/5a97aa1b643252eb9be0901037cb440c2e145956/"
+//		println "?????????? "+javaLibraryPath
+//	}
+}
