@@ -1,0 +1,17 @@
+eclipse {
+	classpath {
+		file {
+			whenMerged { classpath ->
+				// LoggerFactory is not a Logback LoggerContext but Logback is on the classpath. Either remove Logback or the competing implementation (class org.gradle.internal.logging.slf4j.OutputEventListenerBackedLoggerContext loaded from file:/home/bakslashr.manjaro/.gradle/caches/7.6/generated-gradle-jars/gradle-api-7.6.jar). If you are using WebLogic you will need to add 'org.slf4j' to prefer-application-packages in WEB-INF/weblogic.xml
+       			classpath.entries.removeAll {
+       				if (it instanceof org.gradle.plugins.ide.eclipse.model.Library) {
+	       				if (it.path.contains("generated-gradle-jars/gradle-api")) {
+							println "REMOVING: "+it.path
+		       				return true
+	       				}
+	       			}
+       			}
+ 			}
+		}
+	}
+}
