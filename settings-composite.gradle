@@ -37,7 +37,6 @@ if (hasProperty('composite') || System.env.COMPOSITE != null) {
 		hasDelegate=false
 	}
 
-
 	logger.lifecycle "PROJECT: " + group + ":" + rootProject.name
 	if (gradle.parent == null) {
 		logger.lifecycle "ROOT: " + group + ":" + rootProject.name
