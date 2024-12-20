@@ -1,6 +1,8 @@
 eclipse {
-	jdt.file.withProperties { props ->
-		props.setProperty "org.eclipse.jdt.core.circularClasspath", "warning"
+	if (jdt) {
+		jdt.file.withProperties { props ->
+			props.setProperty "org.eclipse.jdt.core.circularClasspath", "warning"
+		}
 	}
 
 	// WORKAROUND: https://github.com/eclipse/buildship/issues/1038  

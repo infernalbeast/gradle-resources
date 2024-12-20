@@ -1,5 +1,7 @@
-[compileJava, compileTestJava]*.options.collect {options ->
-	options.compilerArgs.add '-parameters'
+if (project.hasProperty("compileJava") && project.hasProperty("compileTestJava")) {
+	[compileJava, compileTestJava]*.options.collect {options ->
+		options.compilerArgs.add '-parameters'
+	}
 }
 
 if (project.hasProperty("resourcesComment")) {
@@ -52,13 +54,19 @@ if (project.hasProperty("classesDynamic")) {
 
 if (System.env.ECLIPSE) {
 	dependencies {
-		apply from: rootProject.ext["gradle-resources"] + "source-as-resources.gradle", to: {
-			setSourceSet sourceSets.main
-			setConfiguration configurations.implementation
-		}
-		apply from: rootProject.ext["gradle-resources"] + "source-as-resources.gradle", to: {
-			setSourceSet sourceSets.test
-			setConfiguration configurations.testImplementation
+		if (project.hasProperty("sourceSets")) {
+			if (sourceSets.hasProperty("main")) {
+				apply from: rootProject.ext["gradle-resources"] + "source-as-resources.gradle", to: {
+					setSourceSet sourceSets.main
+					setConfiguration configurations.implementation
+				}
+			}
+			if (sourceSets.hasProperty("text")) {
+				apply from: rootProject.ext["gradle-resources"] + "source-as-resources.gradle", to: {
+					setSourceSet sourceSets.test
+					setConfiguration configurations.testImplementation
+				}
+			}
 		}
 	}
 }
@@ -67,7 +75,9 @@ task synchronization {
 	doFirst {
 		logger.lifecycle "SYNCHRONIZATION: "+project.name
 	}
-	dependsOn(eclipseJdt)
+	if (tasks.findByName('eclipseJdt')) {
+		dependsOn(eclipseJdt)
+	}
 	if (project.parent != null) {
 		project.parent.tasks."synchronization".dependsOn(synchronization)
 	}

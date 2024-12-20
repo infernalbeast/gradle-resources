@@ -1,8 +1,10 @@
-apply plugin: 'java-library'
+//apply plugin: 'java-library'
 //sourceCompatibility = 12
 //targetCompatibility = 12
-sourceCompatibility=JavaVersion.VERSION_17
-targetCompatibility=JavaVersion.VERSION_17
+if (project.plugins.hasPlugin('java-library')) {
+	sourceCompatibility=JavaVersion.VERSION_17
+	targetCompatibility=JavaVersion.VERSION_17
+}
 
 apply plugin: 'eclipse'
 if (gradle.parent == null) {
@@ -43,24 +45,28 @@ configurations {
 	integrationTestRuntime.extendsFrom testRuntime
 }
 
-sourceSets {
-	integrationTest {
-		java {
-			compileClasspath += sourceSets.main.output + sourceSets.test.output
-			runtimeClasspath += sourceSets.main.output + sourceSets.test.output
-			srcDir file('src/integration-test/java')
-		}
-		resources {
-			srcDir file('src/integration-test/resources')
+if (project.hasProperty('sourceSets')) {
+	sourceSets {
+		integrationTest {
+			if (sourceSets.hasProperty('main')) {
+				java {
+					compileClasspath += sourceSets.main.output + sourceSets.test.output
+					runtimeClasspath += sourceSets.main.output + sourceSets.test.output
+					srcDir file('src/integration-test/java')
+				}
+			}
+			resources {
+				srcDir file('src/integration-test/resources')
+			}
 		}
 	}
-}
-
-task integrationTest(type: Test) {
-	group 'Verification'
-	description 'Runs the integration tests.'
-	testClassesDirs = sourceSets.integrationTest.output.classesDirs
-	classpath = sourceSets.integrationTest.runtimeClasspath
+	
+	task integrationTest(type: Test) {
+		group 'Verification'
+		description 'Runs the integration tests.'
+		testClassesDirs = sourceSets.integrationTest.output.classesDirs
+		classpath = sourceSets.integrationTest.runtimeClasspath
+	}
 }
 
 tasks.withType(Test)*.configure { test ->

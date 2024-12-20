@@ -1,3 +1,4 @@
+
 // Configuration has its own dependencies
 def deps = dependencies
 configurations.all { configuration ->
@@ -23,11 +24,14 @@ configurations.all { configuration ->
 			}
 		}
 	}
-	// https://github.com/gradle/gradle/blob/master/subprojects/dependency-management/src/main/java/org/gradle/api/internal/artifacts/configurations/DefaultConfiguration.java
-	if (configuration.isCanBeDeclared()) {
-		if (project.ext.has("bomDependencyManagementProperties")) {
-			project.ext["bomDependencyManagementProperties"].each{ key, value ->
-				deps.add(configuration.name, deps.platform(key+":"+value))
+	if (configuration.name.equals("classpath")) {
+		// https://github.com/gradle/gradle/blob/master/subprojects/dependency-management/src/main/java/org/gradle/api/internal/artifacts/configurations/DefaultConfiguration.java
+		if (configuration.isCanBeDeclared()) {
+			if (project.ext.has("bomDependencyManagementProperties")) {
+				project.ext["bomDependencyManagementProperties"].each{ key, value ->
+					//System.out.println configuration.name + " " + key + ":" + value
+					deps.add(configuration.name, deps.platform(key + ":" + value))
+				}
 			}
 		}
 	}
