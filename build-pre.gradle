@@ -33,7 +33,9 @@ dependencies {
 		project.rootProject.ext["plugin-resolve"].artifacts.each { artifact ->
 			def id = artifact.moduleVersion.id
 			if (id.group == "com.infernalbeast" && id.name == "resources-comment-gradle-plugin") {
-				testImplementation group: id.group, name: id.name, classifier: artifact.classifier
+				if (project.configurations.findByName("testImplementation") != null) {
+					testImplementation group: id.group, name: id.name, classifier: artifact.classifier
+				}
 			}
 		}
 	}
