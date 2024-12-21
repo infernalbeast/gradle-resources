@@ -85,7 +85,11 @@ task synchronization {
 
 task compositeSynchronization {
 	gradle.includedBuilds.each { includedBuild ->
-		dependsOn includedBuild.task(":synchronization")
+		def gradleProperties = new Properties()
+		new java.io.File(includedBuild.projectDir, "gradle.properties").withInputStream { gradleProperties.load(it) }
+		if (gradleProperties.containsKey("com.infernalbeast:bom")) {
+			dependsOn includedBuild.task(":synchronization")
+		}
 	}
 	dependsOn synchronization
 }
