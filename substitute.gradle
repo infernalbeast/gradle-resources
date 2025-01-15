@@ -1,4 +1,3 @@
-
 // Configuration has its own dependencies
 def deps = dependencies
 configurations.all { configuration ->
@@ -29,8 +28,11 @@ configurations.all { configuration ->
 		if (configuration.isCanBeDeclared()) {
 			if (project.ext.has("bomDependencyManagementProperties")) {
 				project.ext["bomDependencyManagementProperties"].each{ key, value ->
-					//System.out.println configuration.name + " " + key + ":" + value
-					deps.add(configuration.name, deps.platform(key + ":" + value))
+					// FIXME
+					if (!rootProject.name.startsWith("casinos") || !key.equals("org.springframework.boot:spring-boot-dependencies")) {
+						logger.lifecycle rootProject.name + " " + configuration.name + " " + key + ":" + value
+						deps.add(configuration.name, deps.platform(key + ":" + value))
+					}
 				}
 			}
 		}

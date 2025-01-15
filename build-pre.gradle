@@ -83,3 +83,5 @@ tasks.withType(Test)*.configure { test ->
 		}
 	}
 }
+
+apply from: rootProject.ext["gradle-resources"] + "utilities.gradle"

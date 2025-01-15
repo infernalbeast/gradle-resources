@@ -6,12 +6,14 @@ if (project.hasProperty("compileJava") && project.hasProperty("compileTestJava")
 
 if (project.hasProperty("resourcesComment")) {
 	resourcesComment {
-		sourceSets.forEach { sourceSet ->
-			def compileJava = tasks.findByName(sourceSet.compileJavaTaskName)
-			def dstDir = new File(new File(buildDir, "resources-comment"), sourceSet.name)
-			def task = create sourceSet, dstDir
-			sourceSet.output.dir(dstDir, buildBy: task.name)
-			compileJava.finalizedBy task
+		if (project.hasProperty('sourceSets')) {
+			sourceSets.forEach { sourceSet ->
+				def compileJava = tasks.findByName(sourceSet.compileJavaTaskName)
+				def dstDir = new File(new File(buildDir, "resources-comment"), sourceSet.name)
+				def task = create sourceSet, dstDir
+				sourceSet.output.dir(dstDir, buildBy: task.name)
+				compileJava.finalizedBy task
+			}
 		}
 	}
 }
@@ -30,24 +32,28 @@ if (project.hasProperty("artifactoryClassloader")) {
 
 if (project.hasProperty("resourcesRegex")) {
 	resourcesRegex {
-		sourceSets.forEach { sourceSet ->
-			def compileJava = tasks.findByName(sourceSet.compileJavaTaskName)
-			def dstDir = new File(new File(buildDir, "resources-regex"), sourceSet.name)
-			def task = create sourceSet, dstDir
-			sourceSet.output.dir(dstDir, buildBy: task.name)
-			compileJava.finalizedBy task
+		if (project.hasProperty('sourceSets')) {
+			sourceSets.forEach { sourceSet ->
+				def compileJava = tasks.findByName(sourceSet.compileJavaTaskName)
+				def dstDir = new File(new File(buildDir, "resources-regex"), sourceSet.name)
+				def task = create sourceSet, dstDir
+				sourceSet.output.dir(dstDir, buildBy: task.name)
+				compileJava.finalizedBy task
+			}
 		}
 	}
 }
 
 if (project.hasProperty("classesDynamic")) {
 	classesDynamic {
-		sourceSets.forEach { sourceSet ->
-			def compileJava = tasks.findByName(sourceSet.compileJavaTaskName)
-			def dstDir = new File(new File(buildDir, "classes-dynamic"), sourceSet.name)
-			def task = create sourceSet, dstDir
-			sourceSet.output.dir(dstDir, buildBy: task.name)
-			compileJava.finalizedBy task
+		if (project.hasProperty('sourceSets')) {
+			sourceSets.forEach { sourceSet ->
+				def compileJava = tasks.findByName(sourceSet.compileJavaTaskName)
+				def dstDir = new File(new File(buildDir, "classes-dynamic"), sourceSet.name)
+				def task = create sourceSet, dstDir
+				sourceSet.output.dir(dstDir, buildBy: task.name)
+				compileJava.finalizedBy task
+			}
 		}
 	}
 }

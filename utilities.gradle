@@ -1,0 +1,85 @@
+def inspect(object) {
+	println "CLASS: "+object.class
+	object.metaClass.methods.each { method ->
+		println "METHOD: "+method.name
+	}
+	object.metaClass.properties.each { property ->
+		println "PROPERTY: "+property.name
+	}
+}
+
+def indentString(int length) {
+	return ' ' * length
+}
+
+def printDependency(ResolvedDependency dependency, indent) {
+    println "${indentString(indent)}${dependency.moduleGroup}:${dependency.moduleName}:${dependency.moduleVersion}"
+    if (false)
+    if (dependency.moduleGroup.equals("com.infernalbeast")) {
+    	println "***************"
+		try {
+			println ">>>>>>>>>"
+	    	println dependency.getAllArtifacts()
+	    	println "<<<<<<<<<"
+	    } catch (Throwable t) {
+	    	println t.getMessage()
+	    }
+		try {
+			println ">>>>>>>>>"
+	    	println dependency.moduleArtifacts
+	    	println "<<<<<<<<<"
+	    } catch (Throwable t) {
+	    	println t.getMessage()
+	    }
+    	inspect dependency
+    }
+    dependency.children.each { child ->
+        printDependency(child, indent+1) // Recursive call to handle nested transitive dependencies
+    }
+}
+
+def printConfiguration(prefix, configuration, indent) {
+	println "${indentString(indent)}${prefix}"+configuration.name+" "+configuration.state
+	configuration.extendsFrom.each { parent ->
+		printConfiguration(prefix, parent, indent+1)
+	}
+	configuration.dependencies.each { dependency ->
+		if (dependency.hasProperty("files")) {
+			dependency.files.each { file ->
+				println "${indentString(indent+1)}DEPENDENCY: "+configuration.name+" "+file
+			}
+		} else {
+    		println "${indentString(indent+1)}DEPENDENCY: "+configuration.name+" "+dependency.group+":"+dependency.name+":"+dependency.version
+		}
+	}
+}
+
+def printResolvedConfiguration(prefix, configuration, indent) {
+	println "${indentString(indent)}${prefix}"+configuration.name+" "+configuration.state
+	configuration.extendsFrom.each { parent ->
+		printResolvedConfiguration(prefix, parent, indent+1)
+	}
+	configuration.incoming.dependencies.each { dependency ->
+		if (dependency.hasProperty("files")) {
+			dependency.files.each { file ->
+				println "${indentString(indent+1)}DEPENDENCY: "+configuration.name+" "+file
+			}
+		} else {
+    		println "${indentString(indent+1)}DEPENDENCY: "+configuration.name+" "+dependency.group+":"+dependency.name+":"+dependency.version
+    		dependency.artifacts.each { artifact ->
+	    		println "${indentString(indent+2)}ARTIFACT: "+configuration.name+" "+artifact
+    		}
+    		inspect dependency
+		}
+	}
+	
+	if (configuration.isCanBeResolved()) {
+		try {
+	    	configuration.files.each { file ->
+				println "${indentString(indent+1)}FILE: "+configuration.name+" "+file
+	        }
+	    } catch(Throwable t) {
+	    	println "ERROR: "+t.getMessage()
+	    }
+    }
+}
