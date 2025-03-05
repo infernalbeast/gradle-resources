@@ -41,14 +41,28 @@ if (hasProperty('composite') || System.env.COMPOSITE != null) {
 	if (gradle.parent == null) {
 		logger.lifecycle "ROOT: " + group + ":" + rootProject.name
 		rootProject.projectDir.parentFile.eachDir() { dir ->
+			logger.lifecycle "DIR NAME: "+dir.name
 			def settingsGradle = new File(dir,"settings.gradle")
 			if (settingsGradle.exists()) {
-				if (!dir.name.equals(rootProject.name)
-				) {
-					logger.lifecycle "INCLUDE BUILD "+dir
-					includeBuild(dir)
+				if (dir.name.equals(rootProject.name)) {
+					logger.lifecycle "EXCLUDE BUILD: "+dir
 				} else {
-					logger.lifecycle "EXCLUDE BUILD "+dir
+					if ([
+						"amazon-web-services-utilities",
+						"spring-utils",
+						"speech",
+						"secret-manager",
+						"database",
+						"empty",
+						"facebook-utilities",
+						"authentication",
+						"spring-utilities",
+					].contains(dir.name)) {
+						logger.lifecycle "IGNORE BUILD: "+dir
+					} else {
+						logger.lifecycle "INCLUDE BUILD: "+dir
+						includeBuild(dir)
+					}
 				}
 			}
 		}
